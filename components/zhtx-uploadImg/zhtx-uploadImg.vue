@@ -9,6 +9,11 @@
 				<text class="zhtx-add">+</text>
 			</view>
 		</view>
+		<view class="num">
+			<text style="color: #007AFF;font-size: 14px;">{{list.length}}</text>
+			
+			/{{limit}}
+		</view>
 	</view>
 </template>
 
@@ -91,8 +96,8 @@
 					success: res => {
 						if (res.confirm) {
 							this.imageList.splice(index,1)
-							this.list.splice(index, 1);
-							this.$forceUpdate(); //强制更新
+							this.list.splice(index, 1); //已经达到了数据更新的状态
+							// this.$forceUpdate(); //强制更新
 							this.$emit('update:uImgList', this.list); //类似双向数据绑定
 						}
 					}
@@ -144,20 +149,58 @@
 			},
 			
 			upload(){
+				let files=[];
 				uni.showLoading({
 					title: '上传中...',
 					mask: false
 				});
+				//这里改成异步上传会不会更好(对于跨端请求,只能重复调用api)
+				// #ifdef APP-PLUS||H5
+				for(let i=0; i<this.list.length;i++){
+					let path=this.list[i]
+					let index=i.toString()
+					files=files.push[{name:index,uri:path}]
+					console.log(path);
+				}
+				uni.uploadFile({
+					url: this.uploadFileUrl,
+					name: this.fileKeyName,
+					filePath: path, // 使用files上传数组列表,上面两者都会失效
+					files:files,
+					success:res=>{
+						uni.hideLoading()
+						console.log(res);
+						this.$emit('uploadSuccess', res);
+						if (res.statusCode == 200) {
+							//上传成功将原信息,直接删除,
+							// this.list.splice(i,1)
+							this.list=this.list.splice()
+							console.log(this.list);
+							console.log(res);
+							this.$forceUpdate();
+						} else {
+										
+						}
+					},
+					fail:err=>{
+						uni.hideLoading()
+						toast(err.errMsg)
+						console.log(err);
+					}
+				})
+				
+				// #endif
 				
 				for(let i=0; i<this.list.length;i++){
 					let path=this.list[i]
 					let index=i.toString()
+					let files={name:index,uri:path}
 					console.log(path);
 					uni.uploadFile({
 						url: this.uploadFileUrl,
 						name: this.fileKeyName,
 						filePath: path, // 使用files上传数组列表,上面两者都会失效
-						files:[
+						files:[ //使用files仅支持app与H5
 							{name:index,uri:path}
 						],
 						success:res=>{
@@ -229,5 +272,13 @@
 		width: 100%;
 		height: 100%;
 		display: block;
+	}
+	.num{
+		float: right;
+		color: #ccc;
+		font-size: 12px;
+	}
+	.num ::after{
+		clear: both;
 	}
 </style>
