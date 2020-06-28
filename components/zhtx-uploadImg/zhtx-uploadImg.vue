@@ -78,7 +78,8 @@
 					loop: true,
 					longPressActions: {
 						itemList: ['发送给朋友', '保存图片', '收藏'],
-						success: function(data) {
+						success:(data)=> {
+							//可以自定义分享操作
 							console.log('选中了第' + (data.tapIndex + 1) + '个按钮,第' + (data.index + 1) + '张图片');
 						},
 						fail: function(err) {
@@ -155,42 +156,7 @@
 					mask: false
 				});
 				//这里改成异步上传会不会更好(对于跨端请求,只能重复调用api)
-				// #ifdef APP-PLUS||H5
-				for(let i=0; i<this.list.length;i++){
-					let path=this.list[i]
-					let index=i.toString()
-					files=files.push[{name:index,uri:path}]
-					console.log(path);
-				}
-				uni.uploadFile({
-					url: this.uploadFileUrl,
-					name: this.fileKeyName,
-					filePath: path, // 使用files上传数组列表,上面两者都会失效
-					files:files,
-					success:res=>{
-						uni.hideLoading()
-						console.log(res);
-						this.$emit('uploadSuccess', res);
-						if (res.statusCode == 200) {
-							//上传成功将原信息,直接删除,
-							// this.list.splice(i,1)
-							this.list=this.list.splice()
-							console.log(this.list);
-							console.log(res);
-							this.$forceUpdate();
-						} else {
-										
-						}
-					},
-					fail:err=>{
-						uni.hideLoading()
-						toast(err.errMsg)
-						console.log(err);
-					}
-				})
-				
-				// #endif
-				
+	
 				for(let i=0; i<this.list.length;i++){
 					let path=this.list[i]
 					let index=i.toString()
@@ -214,7 +180,8 @@
 								console.log(res);
 								this.$forceUpdate();
 							} else {
-											
+								uni.hideLoading()
+								toast('上传失败,请稍后重试')				
 							}
 						},
 						fail:err=>{
@@ -232,7 +199,7 @@
 	};
 </script>
 
-<style  scoped>
+<style  >
 	.zhtx-imgs {
 		display: flex;
 		flex-wrap: wrap;
@@ -278,7 +245,7 @@
 		color: #ccc;
 		font-size: 12px;
 	}
-	.num ::after{
+	.num::after{
 		clear: both;
 	}
 </style>
